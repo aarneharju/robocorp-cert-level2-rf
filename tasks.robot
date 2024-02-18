@@ -88,7 +88,9 @@ Save the receipt as a string
 
 Convert order receipt html page to PDF
     RPA.Browser.Playwright.Wait For Elements State    //div[@id="receipt"]    visible    timeout=10s
-    ${content}=    RPA.Browser.Playwright.Get Attribute    //div[@id="receipt"]    outer
+    #${attributes}    RPA.Browser.Playwright.Get Attribute Names    //div[@id="receipt"]
+    #Log    ${attributes}
+    ${content}=    RPA.Browser.Playwright.Get Property    //div[@id="receipt"]    outerHTML
     RPA.PDF.Html To Pdf    ${content}    ${CURDIR}/output/order_receipt.pdf
 
 Save the order receipt as a PNG file
