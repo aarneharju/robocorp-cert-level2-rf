@@ -53,11 +53,7 @@ Loop and fill the form with the order data
         Select legs        ${order}
         Select address     ${order}
         Submit the order
-        ${order_not_successful}=    RPA.Browser.Playwright.Get Element Count    //button[@id="order"]
-        WHILE    ${order_not_successful} == 1
-            Submit the order
-            ${order_not_successful}=    RPA.Browser.Playwright.Get Element Count    //button[@id="order"]
-        END
+        Take a screenshot of the ordered robot
         Convert order receipt html page to PDF
         Order another robot
         Click ok on the popup
@@ -82,9 +78,17 @@ Select address
 
 Submit the order
     RPA.Browser.Playwright.Click                //button[@id="order"]
+    ${order_not_successful}=    RPA.Browser.Playwright.Get Element Count    //button[@id="order"]
+    WHILE    ${order_not_successful} == 1
+        Submit the order
+        ${order_not_successful}=    RPA.Browser.Playwright.Get Element Count    //button[@id="order"]
+    END
+
+Take a screenshot of the ordered robot
+    RPA.Browser.Playwright.Take screenshot      filename=order    selector=//div[@id="robot-preview-image"]
 
 Save the receipt as a string
-    RPA.Browser.Playwright.Get Text    //div[@id="receipt"]    output_path=${CURDIR}/output/order_receipt.html
+    RPA.Browser.Playwright.Get Text             //div[@id="receipt"]    output_path=${CURDIR}/output/order_receipt.html
 
 Convert order receipt html page to PDF
     RPA.Browser.Playwright.Wait For Elements State    //div[@id="receipt"]    visible    timeout=10s
