@@ -13,7 +13,8 @@ Library            RPA.Tables
 *** Variables ***
 ${GLOBAL_RETRY_AMOUNT}=      3x
 ${GLOBAL_RETRY_INTERVAL}=    1s
-${order_not_successful}=     0             
+${order_not_successful}=     0
+${order_number}=             0             
 
 *** Tasks ***
 Download the order file and complete the order form
@@ -55,6 +56,7 @@ Loop and fill the form with the order data
         Submit the order
         Take a screenshot of the ordered robot
         Convert order receipt html page to PDF
+        Add the image of the ordered robot to PDF
         Order another robot
         Click ok on the popup
     END
@@ -78,27 +80,32 @@ Select address
 
 Submit the order
     RPA.Browser.Playwright.Click                //button[@id="order"]
-    ${order_not_successful}=    RPA.Browser.Playwright.Get Element Count    //button[@id="order"]
+    ${order_not_successful}=                    RPA.Browser.Playwright.Get Element Count    //button[@id="order"]
     WHILE    ${order_not_successful} == 1
         Submit the order
-        ${order_not_successful}=    RPA.Browser.Playwright.Get Element Count    //button[@id="order"]
+        ${order_not_successful}=                RPA.Browser.Playwright.Get Element Count    //button[@id="order"]
     END
+    Save the order number as a string
 
 Take a screenshot of the ordered robot
     RPA.Browser.Playwright.Take screenshot      filename=order    selector=//div[@id="robot-preview-image"]
 
-Save the receipt as a string
-    RPA.Browser.Playwright.Get Text             //div[@id="receipt"]    output_path=${CURDIR}/output/order_receipt.html
+Save the order number as a string
+    ${order_number}=    RPA.Browser.Playwright.Get Text    css=#receipt > p.badge-success
+    Set Suite Variable    ${order_number}
+    Log    ${order_number}
 
 Convert order receipt html page to PDF
     RPA.Browser.Playwright.Wait For Elements State    //div[@id="receipt"]    visible    timeout=10s
     #${attributes}    RPA.Browser.Playwright.Get Attribute Names    //div[@id="receipt"]
     #Log    ${attributes}
     ${content}=    RPA.Browser.Playwright.Get Property    //div[@id="receipt"]    outerHTML
-    RPA.PDF.Html To Pdf    ${content}    ${CURDIR}/output/order_receipt.pdf
+    Log    ${order_number}
+    RPA.PDF.Html To Pdf                         ${content}    ${CURDIR}/output/orders/${order_number}.pdf
 
-Save the order receipt as a PNG file
-    RPA.Browser.Playwright.Take Screenshot   //div[@id="receipt"]    ${CURDIR}/output/order_receipt.png
+Add the image of the ordered robot to PDF
+    ${pdf_and_image_to_merge}=                  Create List    ${CURDIR}/output/${order_number}.pdf    ${CURDIR}/output/browser/screenshot/order.png:scale=50
+    RPA.PDF.Add Files To Pdf                    ${pdf_and_image_to_merge}    ${CURDIR}/output/${order_number}.pdf
 
 Order another robot
     RPA.Browser.Playwright.Wait For Elements State    //button[@id="order-another"]    visible    10
