@@ -9,6 +9,7 @@ Library            RPA.HTTP
 Library            RPA.PDF
 Library            RPA.Robocorp.Vault
 Library            RPA.Tables
+Library            RPA.Archive
 
 *** Variables ***
 ${GLOBAL_RETRY_AMOUNT}=      3x
@@ -22,7 +23,7 @@ Download the order file and complete the order form
     Download the order data                       https://robotsparebinindustries.com/orders.csv
     #Login Maria
     Loop and fill the form with the order data    files/orders.csv
-    #Archive output as PDF
+    Archive order PDFs to a zip file
 
 *** Keywords ***
 Setup browser
@@ -104,8 +105,8 @@ Convert order receipt html page to PDF
     RPA.PDF.Html To Pdf                         ${content}    ${CURDIR}/output/orders/${order_number}.pdf
 
 Add the image of the ordered robot to PDF
-    ${pdf_and_image_to_merge}=                  Create List    ${CURDIR}/output/${order_number}.pdf    ${CURDIR}/output/browser/screenshot/order.png:scale=50
-    RPA.PDF.Add Files To Pdf                    ${pdf_and_image_to_merge}    ${CURDIR}/output/${order_number}.pdf
+    ${pdf_and_image_to_merge}=                  Create List    ${CURDIR}/output/orders/${order_number}.pdf    ${CURDIR}/output/browser/screenshot/order.png:scale=50
+    RPA.PDF.Add Files To Pdf                    ${pdf_and_image_to_merge}    ${CURDIR}/output/orders/${order_number}.pdf
 
 Order another robot
     RPA.Browser.Playwright.Wait For Elements State    //button[@id="order-another"]    visible    10
@@ -114,6 +115,9 @@ Order another robot
 
 Click ok on the popup
     RPA.Browser.Playwright.Click                text=OK
+
+Archive order PDFs to a zip file
+    Archive Folder With Zip    ${CURDIR}/output/orders    ${CURDIR}/output/Orders.zip    include=*.pdf
 
 Close browser
     RPA.Browser.Playwright.Close Browser
