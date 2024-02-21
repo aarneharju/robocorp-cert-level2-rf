@@ -98,8 +98,6 @@ Save the order number as a string
 
 Convert order receipt html page to PDF
     RPA.Browser.Playwright.Wait For Elements State    //div[@id="receipt"]    visible    timeout=10s
-    #${attributes}    RPA.Browser.Playwright.Get Attribute Names    //div[@id="receipt"]
-    #Log    ${attributes}
     ${content}=    RPA.Browser.Playwright.Get Property    //div[@id="receipt"]    outerHTML
     Log    ${order_number}
     RPA.PDF.Html To Pdf                         ${content}    ${CURDIR}/output/orders/${order_number}.pdf
@@ -111,7 +109,6 @@ Add the image of the ordered robot to PDF
 Order another robot
     RPA.Browser.Playwright.Wait For Elements State    //button[@id="order-another"]    visible    10
     RPA.Browser.Playwright.Click                //button[@id="order-another"]
-    #${order_not_successful}=    Set Variable    0
 
 Click ok on the popup
     RPA.Browser.Playwright.Click                text=OK
